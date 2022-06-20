@@ -19,16 +19,16 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 //}
 
 //else {
-  const char *ssid =  "alapati";     // Default WiFi Name
-  const char *pass =  "navyasai";    // Default WiFi Password
+  const char *ssid =  "";     // Default WiFi Name
+  const char *pass =  "";    // Default WiFi Password
 //}
 
 
 WiFiClient client;
 #define MQTT_SERV "io.adafruit.com"
 #define MQTT_PORT 1883
-#define MQTT_NAME "HyperPalBuddy" 
-#define MQTT_PASS "aio_WUPk552u7PEwT02cpuLUS752zRCi" // Enter the API key that you copied from your adafrui IO account
+#define MQTT_NAME "" 
+#define MQTT_PASS "" // Enter the API key that you copied from your adafrui IO account
 
 Adafruit_MQTT_Client mqtt(&client, MQTT_SERV, MQTT_PORT, MQTT_NAME, MQTT_PASS);
 //Set up the feed you're subscribing to
@@ -71,39 +71,44 @@ void setup()
 } 
 void loop()
 {
-   MQTT_connect();  
-Adafruit_MQTT_Subscribe * subscription;
-while ((subscription = mqtt.readSubscription(5000)))
-     {   
-   if (subscription == &Lock)
-     {
+  MQTT_connect();
+  Adafruit_MQTT_Subscribe * subscription;
+  while ((subscription = mqtt.readSubscription(5000)))
+  {
+    if (subscription == &Lock)
+    {
       //Print the new value to the serial monitor
-      Serial.println((char*) Lock.lastread); 
-          
-   if (!strcmp((char*) Lock.lastread, "ON"))
+      Serial.println((char*) Lock.lastread);
+
+      if (!strcmp((char*) Lock.lastread, "ON"))
       {
+        digitalWrite(relay, LOW);
         display.clearDisplay();
         display.setCursor(0, 20);
         display.println("Door Unlocked");
-        display.display(); 
+        display.display();
         Serial.println("Door Unlocked");
-        
+        digitalWrite(buzzer, HIGH);
         delay(2000);
-        
-    }
-    if (!strcmp((char*) Lock.lastread, "OFF"))
+        digitalWrite(buzzer, LOW);
+
+
+      }
+      if (!strcmp((char*) Lock.lastread, "OFF"))
       {
+        digitalWrite(relay, HIGH);
         display.clearDisplay();
         display.setCursor(0, 20);
         display.println("Door Locked");
         display.display();
         Serial.println("Door Closed");
-        
+        digitalWrite(buzzer, HIGH);
         delay(2000);
-        
+        digitalWrite(buzzer, LOW);
+
+      }
     }
- }  
-     } 
+  }
 }
 void MQTT_connect() 
 {
